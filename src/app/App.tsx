@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Heart, Sparkles, Lock, Unlock, Mail, Home, MailOpen, UserPlus, LogIn } from 'lucide-react';
+import { Heart, Sparkles, Lock, Unlock, Mail, Home, MailOpen, UserPlus, LogIn, LogOut } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 type User = {
@@ -14,7 +14,19 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [users, setUsers] = useState<User[]>([{ username: 'bubby', password: 'iloveyou' }]);
+  const [registerSuccess, setRegisterSuccess] = useState('');
+  const [users, setUsers] = useState<User[]>(() => {
+    // Load users from localStorage on mount
+    const savedUsers = localStorage.getItem('heartAccessUsers');
+    if (savedUsers) {
+      try {
+        return JSON.parse(savedUsers);
+      } catch (e) {
+        return [{ username: 'bubby', password: 'iloveyou' }];
+      }
+    }
+    return [{ username: 'bubby', password: 'iloveyou' }];
+  });
   const [accessGranted, setAccessGranted] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
   const [specialAccessGranted, setSpecialAccessGranted] = useState(false);
@@ -23,6 +35,11 @@ export default function App() {
   const [answer, setAnswer] = useState<'granted' | 'denied' | null>(null);
   const [currentView, setCurrentView] = useState<'message' | 'home'>('home');
   const [messageRevealed, setMessageRevealed] = useState(false);
+
+  // Save users to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('heartAccessUsers', JSON.stringify(users));
+  }, [users]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +60,7 @@ export default function App() {
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
+    setRegisterSuccess('');
 
     if (password !== confirmPassword) {
       setLoginError('Passwords do not match! 💔');
@@ -61,11 +79,14 @@ export default function App() {
     }
 
     setUsers([...users, { username, password }]);
-    setLoginError('');
-    setAuthMode('login');
-    setUsername('');
-    setPassword('');
-    setConfirmPassword('');
+    setRegisterSuccess('Account created successfully! Please login. 💖');
+    setTimeout(() => {
+      setAuthMode('login');
+      setUsername('');
+      setPassword('');
+      setConfirmPassword('');
+      setRegisterSuccess('');
+    }, 2000);
   };
 
   const handleRequestAccess = () => {
@@ -114,9 +135,22 @@ export default function App() {
     }
   };
 
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setAccessGranted(false);
+    setSpecialAccessGranted(false);
+    setShowSpecialQuestion(false);
+    setShowReaction(false);
+    setAnswer(null);
+    setCurrentView('home');
+    setMessageRevealed(false);
+    setUsername('');
+    setPassword('');
+  };
+
   if (!isLoggedIn) {
     return (
-      <div className="size-full flex items-center justify-center bg-gradient-to-br from-pink-100 via-rose-100 to-red-100 p-4 overflow-auto">
+      <div className="size-full flex items-center justify-center bg-gradient-to-br from-pink-100 via-rose-100 to-red-100 p-4 overflow-auto min-h-screen">
         {/* Cute floating hearts decoration */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           <Heart className="absolute top-10 left-10 w-8 h-8 text-pink-300 opacity-40 animate-bounce" fill="#fbcfe8" />
@@ -125,33 +159,47 @@ export default function App() {
           <Heart className="absolute bottom-32 right-32 w-7 h-7 text-rose-200 opacity-25 animate-bounce" fill="#fda4af" style={{ animationDelay: '1s' }} />
           <Sparkles className="absolute top-1/3 left-1/4 w-6 h-6 text-pink-300 opacity-30 animate-spin" style={{ animationDuration: '3s' }} />
           <Sparkles className="absolute bottom-1/3 right-1/4 w-5 h-5 text-rose-300 opacity-20 animate-spin" style={{ animationDuration: '4s' }} />
+
+          {/* Additional floating decorations */}
+          <div className="absolute top-1/4 right-1/3 w-12 h-12 bg-pink-200 opacity-20 rounded-full blur-xl animate-pulse" />
+          <div className="absolute bottom-1/4 left-1/3 w-16 h-16 bg-rose-200 opacity-20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
         </div>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-12 max-w-md w-full relative z-10">
-          <div className="text-center mb-6 sm:mb-8">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-6 sm:p-8 md:p-12 max-w-md w-full relative z-10 border-4 border-pink-100">
+          {/* Decorative corner elements */}
+          <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-pink-200 to-transparent opacity-30 rounded-tl-3xl" />
+          <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-rose-200 to-transparent opacity-30 rounded-br-3xl" />
+
+          <div className="text-center mb-6 sm:mb-8 relative">
             <div className="flex justify-center mb-4 relative">
-              <Heart className="w-16 h-16 sm:w-20 sm:h-20 text-pink-600 animate-pulse" fill="#ec4899" />
-              <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-pink-400 animate-bounce" />
+              <div className="relative">
+                <Heart className="w-16 h-16 sm:w-20 sm:h-20 text-pink-600 animate-pulse" fill="#ec4899" />
+                <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-pink-400 animate-bounce" />
+                <Sparkles className="absolute -bottom-1 -left-1 w-4 h-4 text-rose-400 animate-pulse" />
+              </div>
             </div>
-            <h1 className="text-3xl sm:text-4xl text-pink-800 mb-2">Heart Access</h1>
+            <h1 className="text-3xl sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-rose-600 mb-2 font-bold">
+              Heart Access
+            </h1>
             <p className="text-sm sm:text-base text-gray-600">
-              {authMode === 'login' ? 'Login to unlock something special' : 'Create your account'}
+              {authMode === 'login' ? '✨ Login to unlock something special ✨' : '💕 Create your account 💕'}
             </p>
           </div>
 
           {/* Tab switcher */}
-          <div className="flex gap-2 mb-6 bg-pink-50 p-1 rounded-xl">
+          <div className="flex gap-2 mb-6 bg-gradient-to-r from-pink-50 to-rose-50 p-1.5 rounded-2xl shadow-inner">
             <button
               onClick={() => {
                 setAuthMode('login');
                 setLoginError('');
+                setRegisterSuccess('');
                 setPassword('');
                 setConfirmPassword('');
               }}
-              className={`flex-1 px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
+              className={`flex-1 px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base font-medium ${
                 authMode === 'login'
-                  ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md'
-                  : 'text-pink-700 hover:bg-pink-100'
+                  ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg transform scale-105'
+                  : 'text-pink-700 hover:bg-white/50'
               }`}
             >
               <LogIn className="w-4 h-4" />
@@ -161,13 +209,14 @@ export default function App() {
               onClick={() => {
                 setAuthMode('register');
                 setLoginError('');
+                setRegisterSuccess('');
                 setPassword('');
                 setConfirmPassword('');
               }}
-              className={`flex-1 px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
+              className={`flex-1 px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base font-medium ${
                 authMode === 'register'
-                  ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md'
-                  : 'text-pink-700 hover:bg-pink-100'
+                  ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg transform scale-105'
+                  : 'text-pink-700 hover:bg-white/50'
               }`}
             >
               <UserPlus className="w-4 h-4" />
@@ -176,53 +225,53 @@ export default function App() {
           </div>
 
           {authMode === 'login' ? (
-            <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
-              <div>
-                <label htmlFor="username" className="block text-sm text-gray-700 mb-2">
-                  Username
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div className="relative">
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <span>👤</span> Username
                 </label>
                 <input
                   type="text"
                   id="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-pink-200 rounded-xl focus:border-pink-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-pink-200 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 focus:outline-none transition-all bg-white/50"
                   placeholder="Enter your username"
                   required
                 />
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-sm text-gray-700 mb-2">
-                  Password
+              <div className="relative">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <span>🔒</span> Password
                 </label>
                 <input
                   type="password"
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-pink-200 rounded-xl focus:border-pink-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-pink-200 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 focus:outline-none transition-all bg-white/50"
                   placeholder="Enter your password"
                   required
                 />
               </div>
 
               {loginError && (
-                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 text-red-700 text-center text-sm animate-shake">
-                  {loginError}
+                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 text-red-700 text-center text-sm animate-shake flex items-center justify-center gap-2">
+                  <span>❌</span> {loginError}
                 </div>
               )}
 
               <button
                 type="submit"
-                className="w-full px-6 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 sm:py-4 text-sm sm:text-base font-semibold bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
-                <Lock className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Heart className="w-4 h-4 sm:w-5 sm:h-5" fill="white" />
                 Login
               </button>
 
-              <div className="mt-4 text-center text-xs sm:text-sm text-gray-500">
-                <p className="flex items-center justify-center gap-2 flex-wrap">
+              <div className="mt-4 pt-4 border-t border-pink-100">
+                <p className="text-center text-xs sm:text-sm text-gray-500 bg-pink-50 rounded-lg p-3 flex items-center justify-center gap-2 flex-wrap">
                   <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-pink-400" />
                   <span>Hint: Default username is "bubby" 💕</span>
                   <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-pink-400" />
@@ -230,65 +279,77 @@ export default function App() {
               </div>
             </form>
           ) : (
-            <form onSubmit={handleRegister} className="space-y-4 sm:space-y-6">
-              <div>
-                <label htmlFor="reg-username" className="block text-sm text-gray-700 mb-2">
-                  Username
+            <form onSubmit={handleRegister} className="space-y-5">
+              <div className="relative">
+                <label htmlFor="reg-username" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <span>👤</span> Username
                 </label>
                 <input
                   type="text"
                   id="reg-username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-pink-200 rounded-xl focus:border-pink-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-pink-200 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 focus:outline-none transition-all bg-white/50"
                   placeholder="Choose a username"
                   required
                 />
               </div>
 
-              <div>
-                <label htmlFor="reg-password" className="block text-sm text-gray-700 mb-2">
-                  Password
+              <div className="relative">
+                <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <span>🔒</span> Password
                 </label>
                 <input
                   type="password"
                   id="reg-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-pink-200 rounded-xl focus:border-pink-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-pink-200 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 focus:outline-none transition-all bg-white/50"
                   placeholder="Create a password (min 6 chars)"
                   required
                 />
               </div>
 
-              <div>
-                <label htmlFor="confirm-password" className="block text-sm text-gray-700 mb-2">
-                  Confirm Password
+              <div className="relative">
+                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <span>✅</span> Confirm Password
                 </label>
                 <input
                   type="password"
                   id="confirm-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-pink-200 rounded-xl focus:border-pink-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-pink-200 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 focus:outline-none transition-all bg-white/50"
                   placeholder="Confirm your password"
                   required
                 />
               </div>
 
               {loginError && (
-                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 text-red-700 text-center text-sm animate-shake">
-                  {loginError}
+                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 text-red-700 text-center text-sm animate-shake flex items-center justify-center gap-2">
+                  <span>❌</span> {loginError}
+                </div>
+              )}
+
+              {registerSuccess && (
+                <div className="bg-green-50 border-2 border-green-200 rounded-xl p-3 text-green-700 text-center text-sm animate-fadeIn flex items-center justify-center gap-2">
+                  <span>✨</span> {registerSuccess}
                 </div>
               )}
 
               <button
                 type="submit"
-                className="w-full px-6 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 sm:py-4 text-sm sm:text-base font-semibold bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
                 <UserPlus className="w-4 h-4 sm:w-5 sm:h-5" />
                 Create Account
               </button>
+
+              <div className="mt-4 pt-4 border-t border-pink-100">
+                <p className="text-center text-xs sm:text-sm text-gray-500 bg-pink-50 rounded-lg p-3">
+                  💡 Your account will be saved for future logins!
+                </p>
+              </div>
             </form>
           )}
         </div>
@@ -298,7 +359,16 @@ export default function App() {
 
   if (!accessGranted) {
     return (
-      <div className="size-full flex items-center justify-center bg-gradient-to-br from-pink-100 via-rose-100 to-red-100 p-4">
+      <div className="size-full flex items-center justify-center bg-gradient-to-br from-pink-100 via-rose-100 to-red-100 p-4 relative">
+        {/* Logout button */}
+        <button
+          onClick={handleLogout}
+          className="absolute top-4 right-4 px-4 py-2 text-sm bg-white/80 text-gray-700 rounded-full hover:bg-white transition-all shadow-md flex items-center gap-2"
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="hidden sm:inline">Logout</span>
+        </button>
+
         <div className="text-center px-4 sm:px-6 max-w-md w-full">
           <div className="relative inline-block mb-6 sm:mb-8">
             <Heart
@@ -345,7 +415,16 @@ export default function App() {
 
   if (accessGranted && !specialAccessGranted) {
     return (
-      <div className="size-full flex items-center justify-center bg-gradient-to-br from-pink-100 via-rose-100 to-red-100 p-4 overflow-auto">
+      <div className="size-full flex items-center justify-center bg-gradient-to-br from-pink-100 via-rose-100 to-red-100 p-4 overflow-auto relative">
+        {/* Logout button */}
+        <button
+          onClick={handleLogout}
+          className="absolute top-4 right-4 px-4 py-2 text-sm bg-white/80 text-gray-700 rounded-full hover:bg-white transition-all shadow-md flex items-center gap-2 z-20"
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="hidden sm:inline">Logout</span>
+        </button>
+
         <div className="text-center px-4 sm:px-6 max-w-2xl w-full">
           {!showSpecialQuestion ? (
             <div className="animate-fadeIn">
@@ -554,6 +633,15 @@ export default function App() {
                 >
                   <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Message</span>
+                </button>
+
+                <button
+                  onClick={handleLogout}
+                  className="px-3 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base rounded-full transition-all transform hover:scale-105 flex items-center gap-1 sm:gap-2 bg-white text-gray-700 hover:bg-gray-100 shadow"
+                  title="Logout"
+                >
+                  <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Logout</span>
                 </button>
               </div>
             </div>
