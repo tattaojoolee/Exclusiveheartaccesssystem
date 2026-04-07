@@ -35,6 +35,9 @@ export default function App() {
   const [answer, setAnswer] = useState<'granted' | 'denied' | null>(null);
   const [currentView, setCurrentView] = useState<'message' | 'home'>('home');
   const [messageRevealed, setMessageRevealed] = useState(false);
+  const [showReplyQuestion, setShowReplyQuestion] = useState(false);
+  const [girlfriendAnswer, setGirlfriendAnswer] = useState<'yes' | 'no' | null>(null);
+  const [showGirlfriendReaction, setShowGirlfriendReaction] = useState(false);
 
   // Save users to localStorage whenever they change
   useEffect(() => {
@@ -144,8 +147,19 @@ export default function App() {
     setAnswer(null);
     setCurrentView('home');
     setMessageRevealed(false);
+    setShowReplyQuestion(false);
+    setGirlfriendAnswer(null);
+    setShowGirlfriendReaction(false);
     setUsername('');
     setPassword('');
+  };
+
+  const handleGirlfriendAnswer = (choice: 'yes' | 'no') => {
+    setGirlfriendAnswer(choice);
+    setShowGirlfriendReaction(true);
+    if (choice === 'yes') {
+      triggerConfetti();
+    }
   };
 
   if (!isLoggedIn) {
@@ -722,61 +736,261 @@ export default function App() {
                       </div>
                     </button>
                   </div>
-                ) : (
-                  <div className="max-w-3xl mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 md:p-12">
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
-                      <Heart className="w-8 h-8 sm:w-10 sm:h-10 text-pink-600 animate-pulse" fill="#ec4899" />
-                      <h2 className="text-2xl sm:text-3xl text-pink-800 text-center">A Message From My Heart</h2>
-                      <Heart className="w-8 h-8 sm:w-10 sm:h-10 text-pink-600 animate-pulse" fill="#ec4899" />
-                    </div>
+                ) : !showReplyQuestion ? (
+                  <div className="max-w-3xl mx-auto relative">
+                    {/* Floating decorative hearts around the message */}
+                    <Heart className="absolute -top-4 -left-4 w-8 h-8 text-pink-300 opacity-30 animate-bounce hidden sm:block" fill="#fbcfe8" />
+                    <Heart className="absolute -top-4 -right-4 w-6 h-6 text-rose-300 opacity-40 animate-pulse hidden sm:block" fill="#fda4af" />
+                    <Heart className="absolute -bottom-4 -left-4 w-7 h-7 text-pink-200 opacity-35 animate-pulse hidden sm:block" fill="#fbcfe8" style={{ animationDelay: '0.5s' }} />
+                    <Heart className="absolute -bottom-4 -right-4 w-9 h-9 text-rose-200 opacity-25 animate-bounce hidden sm:block" fill="#fda4af" style={{ animationDelay: '1s' }} />
 
-                    <div className="prose prose-sm sm:prose-lg max-w-none text-gray-700 space-y-4 sm:space-y-6 leading-relaxed">
-                      <p className="text-lg sm:text-xl text-pink-700">
-                        Hello Bubby/Bae/Bi/Biiiii,
-                      </p>
+                    <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 md:p-12 border-4 border-pink-100 relative overflow-hidden">
+                      {/* Decorative corner gradients */}
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-pink-100 to-transparent opacity-50 rounded-tr-3xl pointer-events-none" />
+                      <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-rose-100 to-transparent opacity-50 rounded-bl-3xl pointer-events-none" />
 
-                      <p className="text-sm sm:text-base">
-                        The amount of thoughts that have been going through my mind lately includes a lot of things, but one thought that has been constantly occupying the space in my heart is my gratitude towards you. It is something that I may not tell you often, but you mean a lot to me and your presence in my life means a lot. There is so much about you that I love, from the simple things to the big things. You've made my life so warm and joyful that I feel very blessed that I've met you not by choice, instead by chance. You have given me so many reasons to keep going forward that I feel lucky just to have you around. All you have done for me reminds me a lot and surely to be cherished.
-                      </p>
+                      <div className="relative z-10">
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+                          <Heart className="w-8 h-8 sm:w-10 sm:h-10 text-pink-600 animate-pulse" fill="#ec4899" />
+                          <h2 className="text-2xl sm:text-3xl text-pink-800 text-center">A Message From My Heart</h2>
+                          <Heart className="w-8 h-8 sm:w-10 sm:h-10 text-pink-600 animate-pulse" fill="#ec4899" />
+                        </div>
 
-                      <blockquote className="border-l-4 border-pink-400 pl-3 sm:pl-4 italic text-pink-800 bg-pink-50 py-2 sm:py-3 rounded-r-lg text-sm sm:text-base">
-                        "Love bears all things, believes all things, hopes all things, endures all things." (1 Corinthians 13:6–7 ESV)
-                      </blockquote>
+                        {/* Cute divider */}
+                        <div className="flex items-center justify-center gap-2 mb-6">
+                          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-pink-200"></div>
+                          <Sparkles className="w-4 h-4 text-pink-400" />
+                          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-pink-200"></div>
+                        </div>
 
-                      <p className="text-sm sm:text-base">
-                        Simply means that love will always be resilient and never stop working even when conditions get tough, love will not question itself; instead, it is all about remaining faithful, hopeful, and committed.
-                      </p>
+                        <div className="prose prose-sm sm:prose-lg max-w-none text-gray-700 space-y-4 sm:space-y-6 leading-relaxed">
+                          <div className="relative">
+                            <p className="text-lg sm:text-xl text-pink-700 font-medium">
+                              Hello Bubby/Bae/Bi/Biiiii, 💕
+                            </p>
+                            <Sparkles className="absolute -right-2 -top-2 w-5 h-5 text-pink-400 animate-pulse" />
+                          </div>
 
-                      <p className="text-sm sm:text-base">
-                        A love that is patient, compassionate, and able to hold on even when the going gets tough that's how important it is to me. And yes, I do feel like having you in my life is a blessing, since sharing my life with you has made it that much easier to live and enjoy. It is much easier for people to live their lives when they have someone else supporting them. This means that two individuals together will do things faster, motivate each other, and deal with difficulties that might seem insurmountable on their own.
-                      </p>
+                          <p className="text-sm sm:text-base bg-gradient-to-r from-pink-50 to-rose-50 p-4 rounded-xl border-l-4 border-pink-300">
+                            The amount of thoughts that have been going through my mind lately includes a lot of things, but one thought that has been constantly occupying the space in my heart is my gratitude towards you. It is something that I may not tell you often, but you mean a lot to me and your presence in my life means a lot. There is so much about you that I love, from the simple things to the big things. You've made my life so warm and joyful that I feel very blessed that I've met you not by choice, instead by chance. You have given me so many reasons to keep going forward that I feel lucky just to have you around. All you have done for me reminds me a lot and surely to be cherished.
+                          </p>
 
-                      <blockquote className="border-l-4 border-pink-400 pl-3 sm:pl-4 italic text-pink-800 bg-pink-50 py-2 sm:py-3 rounded-r-lg text-sm sm:text-base">
-                        "Two are better than one, because they have a good reward for their toil." (Ecclesiastes 4:9)
-                      </blockquote>
+                          <blockquote className="border-l-4 border-pink-400 pl-3 sm:pl-4 italic text-pink-800 bg-gradient-to-r from-pink-50 to-transparent py-3 sm:py-4 rounded-r-xl text-sm sm:text-base relative">
+                            <Heart className="absolute -left-2 top-2 w-4 h-4 text-pink-400" fill="#f9a8d4" />
+                            "Love bears all things, believes all things, hopes all things, endures all things." (1 Corinthians 13:6–7 ESV)
+                          </blockquote>
 
-                      <p className="text-sm sm:text-base">
-                        Being with you allows me to be myself without worrying about whether I'm good enough. It is rare that you provide me with the kind of serenity that allows me to be who I am. Love from God or love that mirrors God does away with fear. This fear is usually due to insecurity or a lack of confidence. In the absence of any fear, one can have a lot of self-confidence and courage.
-                      </p>
+                          <p className="text-sm sm:text-base">
+                            Simply means that love will always be resilient and never stop working even when conditions get tough, love will not question itself; instead, it is all about remaining faithful, hopeful, and committed.
+                          </p>
 
-                      <blockquote className="border-l-4 border-pink-400 pl-3 sm:pl-4 italic text-pink-800 bg-pink-50 py-2 sm:py-3 rounded-r-lg text-sm sm:text-base">
-                        "Such love has no fear, because perfect love expels all fear" (1 John 4:18 NLT)
-                      </blockquote>
+                          <div className="flex items-center gap-2 my-4">
+                            <Heart className="w-5 h-5 text-pink-400" fill="#fbcfe8" />
+                            <div className="h-px flex-1 bg-gradient-to-r from-pink-200 to-transparent"></div>
+                          </div>
 
-                      <p className="text-sm sm:text-base">
-                        Thank you for your patience, compassion, understanding, and decision to show up in my life. Thank you for making me feel safe, for putting a smile on my face, and for simply brightening my life just by being around. I can't thank you enough for the blessing you've been in my life. I'm extremely thankful that it is YOU 💛
-                      </p>
-                    </div>
+                          <p className="text-sm sm:text-base">
+                            A love that is patient, compassionate, and able to hold on even when the going gets tough that's how important it is to me. And yes, I do feel like having you in my life is a blessing, since sharing my life with you has made it that much easier to live and enjoy. It is much easier for people to live their lives when they have someone else supporting them. This means that two individuals together will do things faster, motivate each other, and deal with difficulties that might seem insurmountable on their own.
+                          </p>
 
-                    <div className="mt-6 sm:mt-8 text-center">
-                      <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-pink-100 to-rose-100 rounded-full">
-                        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-pink-500" />
-                        <p className="text-sm sm:text-base text-pink-800">
-                          With all my love
-                        </p>
-                        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-pink-500" />
+                          <blockquote className="border-l-4 border-pink-400 pl-3 sm:pl-4 italic text-pink-800 bg-gradient-to-r from-pink-50 to-transparent py-3 sm:py-4 rounded-r-xl text-sm sm:text-base relative">
+                            <Sparkles className="absolute -left-2 top-2 w-4 h-4 text-pink-400" />
+                            "Two are better than one, because they have a good reward for their toil." (Ecclesiastes 4:9)
+                          </blockquote>
+
+                          <p className="text-sm sm:text-base bg-gradient-to-r from-rose-50 to-pink-50 p-4 rounded-xl">
+                            Being with you allows me to be myself without worrying about whether I'm good enough. It is rare that you provide me with the kind of serenity that allows me to be who I am. Love from God or love that mirrors God does away with fear. This fear is usually due to insecurity or a lack of confidence. In the absence of any fear, one can have a lot of self-confidence and courage.
+                          </p>
+
+                          <blockquote className="border-l-4 border-pink-400 pl-3 sm:pl-4 italic text-pink-800 bg-gradient-to-r from-pink-50 to-transparent py-3 sm:py-4 rounded-r-xl text-sm sm:text-base relative">
+                            <Heart className="absolute -left-2 bottom-2 w-4 h-4 text-rose-400" fill="#fda4af" />
+                            "Such love has no fear, because perfect love expels all fear" (1 John 4:18 NLT)
+                          </blockquote>
+
+                          <p className="text-sm sm:text-base bg-gradient-to-r from-pink-50 to-rose-50 p-4 rounded-xl border-l-4 border-rose-300">
+                            Thank you for your patience, compassion, understanding, and decision to show up in my life. Thank you for making me feel safe, for putting a smile on my face, and for simply brightening my life just by being around. I can't thank you enough for the blessing you've been in my life. I'm extremely thankful that it is YOU 💛
+                          </p>
+                        </div>
+
+                        {/* Cute divider */}
+                        <div className="flex items-center justify-center gap-2 my-6 sm:my-8">
+                          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-pink-200"></div>
+                          <Heart className="w-5 h-5 text-pink-400" fill="#fbcfe8" />
+                          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-pink-200"></div>
+                        </div>
+
+                        <div className="text-center space-y-6">
+                          <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-pink-100 to-rose-100 rounded-full shadow-md">
+                            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-pink-500 animate-spin" style={{ animationDuration: '3s' }} />
+                            <p className="text-sm sm:text-base text-pink-800 font-medium">
+                              With all my love
+                            </p>
+                            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-pink-500 animate-spin" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
+                          </div>
+
+                          <button
+                            onClick={() => setShowReplyQuestion(true)}
+                            className="group px-6 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full hover:from-pink-600 hover:to-rose-600 transition-all transform hover:scale-110 shadow-xl hover:shadow-2xl flex items-center gap-2 sm:gap-3 mx-auto"
+                          >
+                            <Mail className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
+                            <span className="text-base sm:text-lg font-medium">Reply to this message</span>
+                            <Heart className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" fill="white" />
+                          </button>
+                        </div>
                       </div>
                     </div>
+                  </div>
+                ) : (
+                  <div className="max-w-2xl mx-auto px-4">
+                    {!showGirlfriendReaction ? (
+                      <div className="animate-fadeIn">
+                        <div className="relative inline-block mb-6 sm:mb-8 mx-auto block">
+                          <Heart
+                            className="w-32 h-32 sm:w-40 sm:h-40 animate-pulse mx-auto"
+                            fill="#ec4899"
+                            stroke="#ec4899"
+                            strokeWidth={2}
+                          />
+                          <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 absolute -top-4 -right-4 text-pink-600 animate-bounce" />
+                          <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 absolute -bottom-4 -left-4 text-rose-500 animate-bounce" style={{ animationDelay: '0.2s' }} />
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl sm:text-5xl">
+                            💖
+                          </div>
+                        </div>
+
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl mb-6 sm:mb-8 text-pink-800 px-2 text-center">
+                          Will you let me unlock the "GIRLFRIEND LEVEL" and officially call you mine?
+                        </h1>
+
+                        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-stretch mt-8 sm:mt-12">
+                          <button
+                            onClick={() => handleGirlfriendAnswer('yes')}
+                            className="group relative px-8 sm:px-16 py-5 sm:py-7 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl hover:from-pink-600 hover:to-rose-600 transition-all transform hover:scale-105 sm:hover:scale-110 shadow-2xl flex-1 sm:flex-none"
+                          >
+                            <div className="flex items-center justify-center gap-2 sm:gap-3">
+                              <span className="text-2xl sm:text-3xl">☐</span>
+                              <span className="text-xl sm:text-2xl font-bold">YES</span>
+                            </div>
+                            <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          </button>
+
+                          <button
+                            onClick={() => handleGirlfriendAnswer('no')}
+                            className="group relative px-8 sm:px-16 py-5 sm:py-7 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-2xl hover:from-gray-500 hover:to-gray-600 transition-all transform hover:scale-105 sm:hover:scale-110 shadow-2xl flex-1 sm:flex-none"
+                          >
+                            <div className="flex items-center justify-center gap-2 sm:gap-3">
+                              <span className="text-2xl sm:text-3xl">☐</span>
+                              <span className="text-xl sm:text-2xl font-bold">NO</span>
+                            </div>
+                            <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          </button>
+                        </div>
+
+                        <p className="mt-6 sm:mt-8 text-sm sm:text-lg text-gray-700 flex items-center justify-center gap-2">
+                          <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-pink-500" fill="#ec4899" />
+                          My heart is waiting for your answer...
+                          <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-pink-500" fill="#ec4899" />
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="animate-fadeIn">
+                        {girlfriendAnswer === 'yes' ? (
+                          <div className="text-center">
+                            <div className="relative inline-block mb-6 sm:mb-8">
+                              <Heart
+                                className="w-48 h-48 sm:w-56 sm:h-56 animate-bounce"
+                                fill="#ec4899"
+                                stroke="#ec4899"
+                                strokeWidth={2}
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-6xl sm:text-7xl animate-pulse">💖</span>
+                              </div>
+                            </div>
+
+                            <h1 className="text-4xl sm:text-5xl md:text-6xl mb-6 sm:mb-8 text-pink-800 animate-pulse px-2">
+                              ☑ YES! 💖
+                            </h1>
+
+                            <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-10 max-w-xl mx-auto mb-8 border-4 border-pink-200">
+                              <div className="space-y-6">
+                                <div className="text-5xl sm:text-6xl animate-bounce">
+                                  🎉 🎊 🎈 🎉 🎊
+                                </div>
+
+                                <h2 className="text-2xl sm:text-3xl text-pink-700 font-bold">
+                                  🔓 GIRLFRIEND LEVEL UNLOCKED! 🔓
+                                </h2>
+
+                                <p className="text-xl sm:text-2xl text-pink-600">
+                                  You're officially MINE! 💕
+                                </p>
+
+                                <div className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                                  <p className="mb-4">
+                                    My heart is bursting with joy right now! 💗 You've made me the happiest person in the world by saying YES!
+                                  </p>
+                                  <p>
+                                    I promise to cherish every moment with you, to make you smile every day, and to love you with all my heart. Thank you for choosing me! 🥰
+                                  </p>
+                                </div>
+
+                                <div className="text-4xl sm:text-5xl">
+                                  👫 💑 💕 ✨
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex justify-center gap-2 mt-6">
+                              <Sparkles className="w-8 h-8 text-pink-500 animate-spin" />
+                              <Sparkles className="w-8 h-8 text-rose-500 animate-spin" style={{ animationDelay: '0.2s' }} />
+                              <Sparkles className="w-8 h-8 text-pink-600 animate-spin" style={{ animationDelay: '0.4s' }} />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <div className="relative inline-block mb-6 sm:mb-8">
+                              <Heart
+                                className="w-48 h-48 sm:w-56 sm:h-56"
+                                fill="none"
+                                stroke="#9ca3af"
+                                strokeWidth={2}
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-6xl sm:text-7xl">💔</span>
+                              </div>
+                            </div>
+
+                            <h1 className="text-4xl sm:text-5xl md:text-6xl mb-6 text-gray-700 px-2">
+                              ☑ NO... 😢
+                            </h1>
+
+                            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-10 max-w-xl mx-auto mb-8">
+                              <p className="text-2xl sm:text-3xl text-gray-700 mb-6">
+                                I understand...
+                              </p>
+                              <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-4">
+                                Even though my heart is breaking right now, I respect your decision completely. Your honesty means everything to me, and I would never want you to feel pressured.
+                              </p>
+                              <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+                                Thank you for being honest with me. I hope we can still remain close, and who knows... maybe someday things might be different. Until then, I'll treasure what we have. 💙
+                              </p>
+                            </div>
+
+                            <button
+                              onClick={() => {
+                                setShowGirlfriendReaction(false);
+                                setShowReplyQuestion(false);
+                                setGirlfriendAnswer(null);
+                              }}
+                              className="px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full hover:from-pink-600 hover:to-rose-600 transition-all transform hover:scale-105 shadow-lg"
+                            >
+                              Go Back 💗
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
